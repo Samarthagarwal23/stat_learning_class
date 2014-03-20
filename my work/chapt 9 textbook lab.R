@@ -150,3 +150,39 @@ fitted <- attributes(predict(svmfit.flex,
 
 rocplot(fitted, dat[-train, "y"], add = T, col = "red")
 
+# SVM with multiple classes
+set.seed(1)
+x <- rbind(x, matrix(rnorm(50*2), ncol = 2))
+y <- c(y, rep(0, 50))
+x[y == 0, 2] <- x [y==0, 2] + 2
+dat <- data.frame(x = x, y = as.factor(y))
+par(mfrow = c(1,1))
+plot(x, col = (y+1))
+
+svmfit <- svm(y~., data = dat, kernel="radial",
+              cost = 10, gamma = 1)
+plot(svmfit, dat)
+
+# application to gene expression data
+library(ISLR)
+names(Khan)
+dim(Khan$xtrain)
+dim(Khan$xtest)
+length(Khan$ytrain)
+length(Khan$ytest)
+table(Khan$ytrain)
+table(Khan$ytest)
+
+#use a support vector approach to predict cancer subtype using gene expression measurements.
+dat <- data.frame(x = Khan$xtrain, 
+                  y = as.factor(Khan$ytrain))
+out <- svm(y~., data = dat, 
+           kernel = "linear", cost = 10)
+summary(out)
+
+table(out$fitted, dat$y) # no training errors!
+
+dat.te <- data.frame(x = Khan$xtest, 
+                     y = as.factor(Khan$ytest))
+pred.te <- predict(out, newdata = dat.te)
+table(pred.te, dat.te$y)
